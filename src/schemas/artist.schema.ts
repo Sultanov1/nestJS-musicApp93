@@ -14,4 +14,4 @@ export class Artist {
   image: string;
 }
 
-export const ArtistSchema = SchemaFactory.createForClass(Artist)
+export const ArtistSchema = SchemaFactory.createForClass(Artist);

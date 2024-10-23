@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { Artist, ArtistDocument } from '../schemas/artist.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,6 +14,17 @@ export class ArtistsController {
   @Get()
   async getArtists() {
      return this.artistModel.find();
+  }
+
+  @Get(':id')
+  async getOneArtist(@Param('id') id: string) {
+    const artist = await this.artistModel.findOne({_id: id});
+
+    if (!artist) {
+      throw new NotFoundException(`Product with id ${id} not found`);
+    }
+
+    return artist;
   }
 
   @Post()
