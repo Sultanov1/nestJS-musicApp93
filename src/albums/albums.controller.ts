@@ -13,7 +13,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Album, AlbumDocument } from '../schemas/album.schema';
 import { Model } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createAlbumDto } from './create-album.dto';
+import { CreateAlbumDto } from './create-album.dto';
 
 @Controller('albums')
 export class AlbumsController {
@@ -22,7 +22,6 @@ export class AlbumsController {
 
   @Get()
   getAll(@Query('artistId') artistId: string) {
-
     if (!artistId) {
       return this.AlbumModel.find().populate('artist', 'name');
     }else {
@@ -31,7 +30,7 @@ export class AlbumsController {
     }
   }
 
-  @Get()
+  @Get(':id')
   getOneArtist(@Param('id') id: string) {
     const album = this.AlbumModel.findOne({ _id: id });
 
@@ -45,7 +44,7 @@ export class AlbumsController {
   @Post()
   @UseInterceptors(FileInterceptor('image', { dest: './public/images' }))
   async createAlbum(
-    @Body() albumDto: createAlbumDto,
+    @Body() albumDto: CreateAlbumDto,
     @UploadedFile() file: Express.Multer.File
   ) {
     return await this.AlbumModel.create({
