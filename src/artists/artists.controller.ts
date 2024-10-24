@@ -59,7 +59,7 @@ export class ArtistsController {
         return { message: 'Artist not found or already deleted', status: 404 };
       }
 
-      return {message: 'Artist was successfully deleted', status: 200}
+      return artist;
     }catch (e) {
       console.error('Invalid server error' + e);
     }
