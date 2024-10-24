@@ -6,13 +6,10 @@ import {
   Param,
   Post,
   Query,
-  UploadedFile,
-  UseInterceptors,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Track, TrackDocument } from '../schemas/track.schema';
 import { Model } from 'mongoose';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateTrackDto } from './create-track.dto';
 
 @Controller('tracks')
@@ -42,8 +39,8 @@ export class TracksController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('image', { dest: './public/images' }))
- async createTrack(@Body() trackDto: CreateTrackDto, @UploadedFile() file: Express.Multer.File) {
+ async createTrack(
+   @Body() trackDto: CreateTrackDto) {
     return  await this.trackModel.create({
       name: trackDto.name,
       album: trackDto.album,
