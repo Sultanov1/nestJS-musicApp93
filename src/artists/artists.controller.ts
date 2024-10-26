@@ -12,7 +12,7 @@ import {
 import { Artist, ArtistDocument } from '../schemas/artist.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateArtistDto } from './create-artist.dto';
+import { CreateArtistDto } from './dto/create-artist.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { artistStorage} from '../multer/storage-config';
 

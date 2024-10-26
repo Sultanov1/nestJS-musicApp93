@@ -10,7 +10,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Track, TrackDocument } from '../schemas/track.schema';
 import { Model } from 'mongoose';
-import { CreateTrackDto } from './create-track.dto';
+import { CreateTrackDto } from './dto/create-track.dto';
 
 @Controller('tracks')
 export class TracksController {

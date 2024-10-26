@@ -13,7 +13,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Album, AlbumDocument } from '../schemas/album.schema';
 import { Model } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateAlbumDto } from './create-album.dto';
+import { CreateAlbumDto } from './dto/create-album.dto';
 import { albumStorage } from '../multer/storage-config';
 
 @Controller('albums')
