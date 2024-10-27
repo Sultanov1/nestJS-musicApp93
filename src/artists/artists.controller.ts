@@ -6,15 +6,19 @@ import {
   NotFoundException,
   Param,
   Post,
+  UnauthorizedException, UnprocessableEntityException,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { Artist, ArtistDocument } from '../schemas/artist.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { artistStorage} from '../multer/storage-config';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleAuthGuard } from '../auth/role-auth.guard';
 
 @Controller('artists')
 export class ArtistsController {
@@ -38,31 +42,44 @@ export class ArtistsController {
     return artist;
   }
 
+  @UseGuards(AuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('image', {storage: artistStorage}))
   async createArtist(
     @Body() artistDto: CreateArtistDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.artistModel.create({
-      name: artistDto.name,
-      info: artistDto.info,
-      image: file ? 'images/artists/' + file.filename : null,
-    });
+    if (!AuthGuard) {
+      throw new UnauthorizedException('Unauthorized access');
+    }
+    try {
+      const artist  = new this.artistModel({
+        name: artistDto.name,
+        info: artistDto.info,
+        image: file ? 'images/artists/' + file.filename : null,
+      });
+
+      await artist.save();
+
+      return artist;
+    } catch (e) {
+      if (e instanceof mongoose.Error.ValidationError) {
+        throw new UnprocessableEntityException(e);
+      }
+
+      throw e;
+    }
   }
 
+  @UseGuards(RoleAuthGuard)
   @Delete(':id')
   async deleteArtist(@Param('id') id: string) {
-    try {
-      const artist = await this.artistModel.deleteOne({ _id: id });
+      const artist = await this.artistModel.findByIdAndDelete(id);
 
-      if (artist.deletedCount === 0) {
-        return { message: 'Artist not found or already deleted', status: 404 };
+      if (!artist) {
+        throw new NotFoundException('Such artist don\'t exist');
       }
 
       return artist;
-    }catch (e) {
-      console.error('Invalid server error' + e);
     }
-  }
 }

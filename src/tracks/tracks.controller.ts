@@ -5,12 +5,14 @@ import {
   NotFoundException,
   Param,
   Post,
-  Query,
+  Query, UnauthorizedException, UnprocessableEntityException, UseGuards,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Track, TrackDocument } from '../schemas/track.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { CreateTrackDto } from './dto/create-track.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleAuthGuard } from '../auth/role-auth.guard';
 
 @Controller('tracks')
 export class TracksController {
@@ -38,29 +40,42 @@ export class TracksController {
     return track;
   }
 
+  @UseGuards(AuthGuard)
   @Post()
  async createTrack(
    @Body() trackDto: CreateTrackDto) {
-    return  await this.trackModel.create({
-      name: trackDto.name,
-      album: trackDto.album,
-      duration: trackDto.duration,
-      number: trackDto.number,
-    });
+    if (!AuthGuard) {
+      throw new UnauthorizedException('Unauthorized access');
+    }
+
+    try {
+      const album = new this.trackModel({
+        name: trackDto.name,
+        album: trackDto.album,
+        duration: trackDto.duration,
+        number: trackDto.number,
+      });
+
+      await album.save();
+
+      return album;
+    } catch (e) {
+     if (e instanceof mongoose.Error.ValidationError) {
+       throw new UnprocessableEntityException(e);
+     }
+     throw e;
+    }
   }
 
+  @UseGuards(RoleAuthGuard)
   @Delete(':id')
   async deleteTrack(@Param('id') id: string) {
-    try {
-      const track = await this.trackModel.deleteOne({ _id: id });
+      const track = await this.trackModel.findByIdAndDelete( id );
 
-      if (track.deletedCount === 0) {
-        return { message: 'Artist not found or already deleted', status: 404 };
+      if (!track) {
+        throw new NotFoundException('Such artist don\'t exist');
       }
 
       return track;
-    } catch (e) {
-      console.error(`Invalid server error${e}`);
-    }
   }
 }
