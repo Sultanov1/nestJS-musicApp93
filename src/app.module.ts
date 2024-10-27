@@ -13,6 +13,7 @@ import { UsersController } from './users/users.controller';
 import { AuthService } from './auth/auth.service';
 import { LocalStrategy } from './auth/local.strategy';
 import { PassportModule } from '@nestjs/passport';
+import { UniqueUserEmailConstraint } from './users/validators/uniqueUserEmail.validator';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { PassportModule } from '@nestjs/passport';
     PassportModule,
   ],
   controllers: [AppController, ArtistsController, AlbumsController, TracksController, UsersController],
-  providers: [AppService, AuthService, LocalStrategy],
+  providers: [AppService, AuthService, LocalStrategy, UniqueUserEmailConstraint],
 })
 
 export class AppModule {
