@@ -6,7 +6,7 @@ import {
   NotFoundException,
   Param,
   Post,
-  UnauthorizedException, UnprocessableEntityException,
+  UnprocessableEntityException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -42,16 +42,13 @@ export class ArtistsController {
     return artist;
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   @UseInterceptors(FileInterceptor('image', {storage: artistStorage}))
   async createArtist(
     @Body() artistDto: CreateArtistDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!AuthGuard) {
-      throw new UnauthorizedException('Unauthorized access');
-    }
     try {
       const artist  = new this.artistModel({
         name: artistDto.name,
@@ -74,12 +71,12 @@ export class ArtistsController {
   @UseGuards(RoleAuthGuard)
   @Delete(':id')
   async deleteArtist(@Param('id') id: string) {
-      const artist = await this.artistModel.findByIdAndDelete(id);
+    const artist = await this.artistModel.findByIdAndDelete(id);
 
-      if (!artist) {
-        throw new NotFoundException('Such artist don\'t exist');
-      }
-
-      return artist;
+    if (!artist) {
+      throw new NotFoundException('Such artist don\'t exist');
     }
+
+    return artist;
+  }
 }

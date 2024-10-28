@@ -6,7 +6,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Artist, ArtistSchema } from './schemas/artist.schema';
 import { AlbumsController } from './albums/albums.controller';
 import { Album, AlbumSchema } from './schemas/album.schema';
-import { TracksController } from './tracks/tracks.controller';
 import { Track, TrackSchema } from './schemas/track.schema';
 import { User, UserSchema } from './schemas/user.schema';
 import { UsersController } from './users/users.controller';
@@ -14,6 +13,7 @@ import { AuthService } from './auth/auth.service';
 import { LocalStrategy } from './auth/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { UniqueUserEmailConstraint } from './users/validators/uniqueUserEmail.validator';
+import { TracksController } from './tracks/tracks.controller';
 
 @Module({
   imports: [

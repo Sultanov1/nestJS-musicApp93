@@ -7,7 +7,6 @@ import {
   Param,
   Post,
   Query,
-  UnauthorizedException,
   UnprocessableEntityException,
   UploadedFile,
   UseGuards,
@@ -51,17 +50,13 @@ export class AlbumsController {
     return album;
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   @UseInterceptors(FileInterceptor('image', { storage: albumStorage }))
   async createAlbum(
     @Body() albumDto: CreateAlbumDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!AuthGuard) {
-      throw new UnauthorizedException('Unauthorized access');
-    }
-
     try {
       const album = new this.AlbumModel({
         name: albumDto.name,
@@ -85,12 +80,12 @@ export class AlbumsController {
   @UseGuards(RoleAuthGuard)
   @Delete(':id')
   async deleteAlbum(@Param('id') id: string) {
-      const album = await this.AlbumModel.findByIdAndDelete( id );
+    const album = await this.AlbumModel.findByIdAndDelete( id );
 
-      if (!album) {
-        throw new NotFoundException('Such album don\'t exist');
-      }
+    if (!album) {
+      throw new NotFoundException('Such album don\'t exist');
+    }
 
-      return album;
+    return album;
   }
 }

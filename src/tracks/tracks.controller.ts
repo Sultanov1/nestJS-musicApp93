@@ -1,11 +1,14 @@
 import {
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
   Post,
-  Query, UnauthorizedException, UnprocessableEntityException, UseGuards,
+  Query,
+  UnprocessableEntityException,
+  UseGuards,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Track, TrackDocument } from '../schemas/track.schema';
@@ -16,15 +19,17 @@ import { RoleAuthGuard } from '../auth/role-auth.guard';
 
 @Controller('tracks')
 export class TracksController {
-  constructor(@InjectModel(Track.name) private trackModel: Model<TrackDocument>) {
-  }
+  constructor(
+    @InjectModel(Track.name) private trackModel: Model<TrackDocument>,
+  ) {}
 
   @Get()
   getAll(@Query('trackId') trackId: string) {
     if (!trackId) {
       return this.trackModel.find().populate('track', 'name');
     } else {
-      return this.trackModel.find({ track: { _id: trackId } })
+      return this.trackModel
+        .find({ track: { _id: trackId } })
         .populate('track', 'name');
     }
   }
@@ -40,14 +45,9 @@ export class TracksController {
     return track;
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Post()
- async createTrack(
-   @Body() trackDto: CreateTrackDto) {
-    if (!AuthGuard) {
-      throw new UnauthorizedException('Unauthorized access');
-    }
-
+  async createTrack(@Body() trackDto: CreateTrackDto) {
     try {
       const album = new this.trackModel({
         name: trackDto.name,
@@ -60,22 +60,22 @@ export class TracksController {
 
       return album;
     } catch (e) {
-     if (e instanceof mongoose.Error.ValidationError) {
-       throw new UnprocessableEntityException(e);
-     }
-     throw e;
+      if (e instanceof mongoose.Error.ValidationError) {
+        throw new UnprocessableEntityException(e);
+      }
+      throw e;
     }
   }
 
   @UseGuards(RoleAuthGuard)
   @Delete(':id')
   async deleteTrack(@Param('id') id: string) {
-      const track = await this.trackModel.findByIdAndDelete( id );
+    const track = await this.trackModel.findByIdAndDelete(id);
 
-      if (!track) {
-        throw new NotFoundException('Such artist don\'t exist');
-      }
+    if (!track) {
+      throw new NotFoundException("Such artist don't exist");
+    }
 
-      return track;
+    return track;
   }
 }
